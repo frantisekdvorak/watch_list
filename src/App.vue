@@ -21,6 +21,7 @@
       <WantToWatch
         :movies="wantToWatch"
         @select="selectMovie"
+        @remove="removeFromWatchlist"
       />
 
       <MovieDetails
@@ -43,7 +44,10 @@
         @hide="showRecommendations = false"
       />
 
-      <WatchedList :movies="watched" />
+      <WatchedList
+        :movies="watched"
+        @remove="removeFromWatched"
+      />
     </div>
   </div>
 </template>
@@ -139,6 +143,22 @@ export default {
       localStorage.setItem('wantToWatch', JSON.stringify(this.wantToWatch));
       localStorage.setItem('watched', JSON.stringify(this.watched));
     },
+    removeFromWatchlist(movie) {
+      this.wantToWatch = this.wantToWatch.filter(m => m.imdbID !== movie.imdbID);
+      this.save();
+    },
+
+    removeFromWatched(movie) {
+      this.watched = this.watched.filter(m => m.imdbID !== movie.imdbID);
+
+      // Only add to wantToWatch if it's not already there
+      if (!this.wantToWatch.find(m => m.imdbID === movie.imdbID)) {
+        this.wantToWatch.push(movie);
+      }
+
+      this.save();
+    },
+
     async generateRecommendations() {
       const apiKey = import.meta.env.VITE_TMDB_API_KEY;
       const genreCount = {};
