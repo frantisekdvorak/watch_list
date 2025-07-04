@@ -1,26 +1,43 @@
 <template>
-  <div class="bg-gray-800 shadow-lg p-6 rounded-xl space-y-4 text-center border border-gray-700">
-    <h3 class="text-2xl font-semibold text-indigo-300">{{ movie.Title }}</h3>
-    <img
-      :src="movie.Poster"
-      alt="Poster"
-      class="w-44 mx-auto rounded-md border border-gray-500"
-    />
-    <p class="text-sm text-gray-400 leading-relaxed">{{ movie.Plot }}</p>
+  <div class="bg-gray-800 p-4 rounded shadow-md relative">
     <button
-      @click="$emit('watched')"
-      class="bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 transition"
+      @click="$emit('close')"
+      class="absolute top-2 right-2 text-gray-400 hover:text-white text-sm"
+      aria-label="Close"
     >
-      Mark as Watched
+      ✖
     </button>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+      <img v-if="movie.Poster" :src="movie.Poster" alt="Poster" class="w-full sm:w-40 rounded" />
+      <div>
+        <h2 class="text-xl font-semibold text-indigo-400">
+          {{ movie.Title }} ({{ movie.Year }})
+        </h2>
+        <p class="text-sm text-gray-300 italic mb-2">{{ movie.Genre }}</p>
+        <p class="text-gray-200 mb-2">{{ movie.Plot }}</p>
+
+        <div class="text-sm text-gray-400 space-y-1 mt-2">
+          <p>⭐ <span class="text-white font-medium">{{ movie.Rating }}</span> ({{ movie.Votes }} votes)</p>
+          <p>🕒 Runtime: {{ movie.Runtime }} minutes</p>
+          <p>🔥 Popularity: {{ movie.Popularity.toFixed(1) }}</p>
+          <p>🌐 Language: {{ movie.Language.toUpperCase() }}</p>
+        </div>
+
+        <button
+          @click="$emit('watched')"
+          class="mt-4 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded"
+        >
+          Mark as Watched
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'MovieDetails',
-  props: {
-    movie: Object
-  }
+  props: ['movie'],
+  emits: ['watched', 'close']
 };
 </script>

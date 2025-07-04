@@ -16,6 +16,7 @@
         v-if="searchResult"
         :searchResult="searchResult"
         @add="addToWatchlist"
+        @close="searchResult = null"
       />
 
       <WantToWatch
@@ -28,6 +29,7 @@
         v-if="selectedMovie"
         :movie="selectedMovie"
         @watched="markAsWatched"
+        @close="selectedMovie = null"
       />
 
       <div v-if="recommended.length" class="text-center mt-6 space-y-2">
@@ -132,10 +134,14 @@ export default {
           Poster: movie.poster_path
             ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
             : '',
+          Rating: movie.vote_average?.toFixed(1) ?? '',
+          Votes: movie.vote_count ?? '',
+          Runtime: movie.runtime ?? '',
+          Popularity: movie.popularity ?? '',
+          Language: movie.original_language ?? '',
         };
       } else {
         this.searchResult = null;
-        alert('Movie not found.');
       }
     },
     addToWatchlist(movie) {
