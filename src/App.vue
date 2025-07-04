@@ -30,18 +30,37 @@
         @watched="markAsWatched"
       />
 
-      <button
-        v-if="!showRecommendations && recommended.length"
-        @click="showRecommendations = true"
-        class="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors duration-200"
-      >
-        Show Recommendations
-      </button>
+      <div v-if="recommended.length" class="text-center mt-6 space-y-2">
+        <button
+          v-if="!showRecommendations"
+          @click="showRecommendations = true"
+          class="text-sm px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white rounded transition"
+        >
+          Show Recommendations
+        </button>
+
+        <div v-else>
+          <button
+            @click="showRecommendations = false"
+            class="text-sm px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition mb-2"
+          >
+            Hide Recommendations
+          </button>
+
+          <button
+            @click="generateAlternateRecommendations"
+            class="text-sm px-4 py-2 bg-indigo-500 hover:bg-indigo-400 text-white rounded transition"
+          >
+            🔄 Refresh Recommendations
+          </button>
+        </div>
+      </div>
 
       <Recommendation
         v-if="showRecommendations"
         :recommended="recommended"
         @hide="showRecommendations = false"
+        @add="addToWatchlist"
       />
 
       <WatchedList
@@ -122,7 +141,13 @@ export default {
     addToWatchlist(movie) {
       if (!this.wantToWatch.find((m) => m.imdbID === movie.imdbID)) {
         this.wantToWatch.push(movie);
+        this.recommended = this.recommended.filter(m => m.imdbID !== movie.imdbID);
         this.save();
+
+        // Only regenerate if at least 1 recommendation was removed
+        if (this.recommended.length < 6) {
+          this.generateRecommendations();
+        }
       }
     },
     selectMovie(movie) {
@@ -197,17 +222,82 @@ export default {
       );
       const discoverData = await discoverRes.json();
 
-      this.recommended = discoverData.results.slice(0, 6).map((movie) => ({
-        imdbID: movie.id,
-        Title: movie.title,
-        Year: movie.release_date?.slice(0, 4) ?? '',
-        Genre: '',
-        Plot: movie.overview,
-        Poster: movie.poster_path
-          ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-          : '',
-      }));
-      console.log(this.recommended);
+      const seenIds = new Set([
+        ...this.watched.map((m) => m.imdbID),
+        ...this.wantToWatch.map((m) => m.imdbID),
+      ]);
+
+      this.recommended = discoverData.results
+        .filter((movie) => !seenIds.has(movie.id))
+        .slice(0, 6)
+        .map((movie) => ({
+          imdbID: movie.id,
+          Title: movie.title,
+          Year: movie.release_date?.slice(0, 4) ?? '',
+          Genre: '',
+          Plot: movie.overview,
+          Poster: movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : '',
+        }));
+    },
+
+    async generateAlternateRecommendations() {
+      const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+      const genreCount = {};
+
+      const allMovies = [...this.watched, ...this.wantToWatch, ...this.recommended];
+      allMovies.forEach((movie) => {
+        if (movie.Genre) {
+          movie.Genre.split(',').forEach((g) => {
+            const genre = g.trim();
+            genreCount[genre] = (genreCount[genre] || 0) + 1;
+          });
+        }
+      });
+
+      const topGenres = Object.entries(genreCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([g]) => g);
+
+      const genreRes = await fetch(
+        `https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}`
+      );
+      const genreData = await genreRes.json();
+      const genreMap = {};
+      genreData.genres.forEach((g) => (genreMap[g.name] = g.id));
+
+      const genreIds = topGenres
+        .map((name) => genreMap[name])
+        .filter(Boolean)
+        .join(',');
+
+      if (!genreIds) return;
+
+      // Try a random page to get different results
+      const randomPage = Math.floor(Math.random() * 10) + 1;
+
+      const discoverRes = await fetch(
+        `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&with_genres=${genreIds}&sort_by=popularity.desc`
+      );
+      const discoverData = await discoverRes.json();
+
+      const seenIds = new Set([...this.watched, ...this.wantToWatch, ...this.recommended].map(m => m.imdbID));
+
+      this.recommended = discoverData.results
+        .filter((movie) => !seenIds.has(movie.id))
+        .slice(0, 6)
+        .map((movie) => ({
+          imdbID: movie.id,
+          Title: movie.title,
+          Year: movie.release_date?.slice(0, 4) ?? '',
+          Genre: '',
+          Plot: movie.overview,
+          Poster: movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : '',
+        }));
     },
   },
 };

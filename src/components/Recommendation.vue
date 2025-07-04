@@ -1,42 +1,31 @@
 <template>
-  <div class="bg-gray-800 p-5 rounded-md border border-gray-700 shadow">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="text-2xl font-bold text-yellow-400">🎯 Recommended for You</h2>
-      <button
-        @click="$emit('hide')"
-        class="text-sm text-gray-400 hover:text-gray-200 hover:underline"
-      >
-        Hide
-      </button>
+  <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+    <div
+      v-for="movie in recommended"
+      :key="movie.imdbID"
+      class="bg-gray-800 p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
+      @click="addMovie(movie)"
+    >
+      <img
+        :src="movie.Poster"
+        :alt="movie.Title"
+        class="w-full h-60 object-cover rounded mb-2"
+      />
+      <h3 class="text-lg font-semibold">{{ movie.Title }}</h3>
+      <p class="text-sm text-gray-400">{{ movie.Year }}</p>
+      <p class="text-xs mt-1 text-gray-300 line-clamp-3">{{ movie.Plot }}</p>
     </div>
-    <ul class="space-y-3">
-      <li
-        v-for="movie in recommended"
-        :key="movie.imdbID"
-        class="flex gap-4 items-center"
-      >
-        <img
-          :src="movie.Poster"
-          class="w-16 rounded shadow border border-gray-600"
-        />
-        <div>
-          <p class="text-lg font-semibold">{{ movie.Title }} ({{ movie.Year }})</p>
-          <p class="text-sm text-gray-400">{{ movie.Genre }}</p>
-        </div>
-      </li>
-    </ul>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Recommendation',
-  props: {
-    recommended: Array,
+  props: ['recommended'],
+  emits: ['add'],
+  methods: {
+    addMovie(movie) {
+      this.$emit('add', movie); // This will trigger App.vue's `addToWatchlist`
+    },
   },
 };
 </script>
-
-<style scoped>
-/* Scoped styles if needed */
-</style>
