@@ -6,6 +6,8 @@
         🎬 Movie Watchlist
       </h1>
 
+      <h1>Maruška je moje nejoblíbenější sestra</h1>
+
       <MovieSearch
         :searchQuery="searchQuery"
         @update-query="searchQuery = $event"
