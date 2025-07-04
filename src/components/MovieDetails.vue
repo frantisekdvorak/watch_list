@@ -24,6 +24,16 @@
           <p>🌐 Language: {{ movie.Language.toUpperCase() }}</p>
         </div>
 
+        <p v-if="movie.TrailerLink" class="mt-3">
+          🎥 <a
+            :href="movie.TrailerLink"
+            target="_blank"
+            class="text-indigo-400 hover:underline"
+          >
+            Watch Trailer on YouTube
+          </a>
+        </p>
+
         <button
           @click="$emit('watched')"
           class="mt-4 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded"

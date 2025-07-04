@@ -155,10 +155,28 @@ export default {
           this.generateRecommendations();
         }
       }
+      if (this.searchResult != null) {
+        this.searchResult = null;
+      }
     },
-    selectMovie(movie) {
-      this.selectedMovie = movie;
-    },
+    async selectMovie(movie) {
+      const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+
+      const videoRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${movie.imdbID}/videos?api_key=${apiKey}`
+      );
+      const videoData = await videoRes.json();
+
+      const trailer = videoData.results.find(
+        (v) => v.type === "Trailer" && v.site === "YouTube"
+      );
+
+      this.selectedMovie = {
+        ...movie,
+        TrailerLink: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
+      };
+    }
+,
     markAsWatched() {
       if (this.selectedMovie) {
         this.watched.push(this.selectedMovie);
