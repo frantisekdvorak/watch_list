@@ -35,7 +35,7 @@
         @click="showRecommendations = true"
         class="mt-4 text-sm text-indigo-400 hover:underline"
       >
-        Show Recommendations Again
+        Show Recommendations
       </button>
 
       <Recommendation
@@ -77,7 +77,7 @@ export default {
       watched: JSON.parse(localStorage.getItem('watched') || '[]'),
       selectedMovie: null,
       recommended: [],
-      showRecommendations: true,
+      showRecommendations: false,
     };
   },
   mounted() {
