@@ -78,7 +78,7 @@ export default {
   },
   methods: {
     async searchMovie(query) {
-      const apiKey = '3da11e846341547d655f9930839a2ac6';
+      const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
       const searchRes = await fetch(
         `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`
@@ -135,7 +135,7 @@ export default {
       localStorage.setItem('watched', JSON.stringify(this.watched));
     },
     async generateRecommendations() {
-      const apiKey = '3da11e846341547d655f9930839a2ac6';
+      const apiKey = import.meta.env.VITE_TMDB_API_KEY;
       const genreCount = {};
 
       const allMovies = [...this.watched, ...this.wantToWatch];
