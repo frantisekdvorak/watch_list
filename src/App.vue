@@ -33,7 +33,7 @@
       <button
         v-if="!showRecommendations && recommended.length"
         @click="showRecommendations = true"
-        class="mt-4 text-sm text-indigo-400 hover:underline"
+        class="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors duration-200"
       >
         Show Recommendations
       </button>
