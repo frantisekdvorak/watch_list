@@ -76,6 +76,11 @@ export default {
       showRecommendations: true,
     };
   },
+  mounted() {
+    if (this.wantToWatch.length || this.watched.length) {
+      this.generateRecommendations();
+    }
+  },
   methods: {
     async searchMovie(query) {
       const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -182,6 +187,7 @@ export default {
           ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
           : '',
       }));
+      console.log(this.recommended);
     },
   },
 };
